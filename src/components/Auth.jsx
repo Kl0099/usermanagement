@@ -10,7 +10,8 @@ import {
 
 function Auth({ type }) {
   const navigate = useNavigate();
-  // this is all form inputs
+
+  // State to manage form inputs
   const [formInput, setFormInput] = useState({
     email: "",
     password: "",
@@ -19,23 +20,25 @@ function Auth({ type }) {
     city: "",
     state: "",
   });
-  // this is for validate user
+
+  // State to manage validation errors
   const [error, setError] = useState({
     type: "",
     message: "",
   });
-  // this state for show password
+
+  // State to toggle password visibility
   const [showPasswords, setShowPasswords] = useState(false);
+
+  // Function to handle form submission
   const handleformsubmit = () => {
     if (type === "register") {
-      // here i check if email number and password are valid or not
+      // Validate email, mobile number, and password
       let isEmailValidate = validateEmail(formInput.email.toString());
       let isNumber = validateMobileNumber(parseInt(formInput.mobileNumber));
       let isvalidatePassword = validatePassword(formInput.password);
-      // console.log(isEmailValidate);
-      // console.log(isNumber);
-      // console.log(isvalidatePassword);
-      // here i check if email number and password are valid
+
+      // Set error messages based on validation
       if (isEmailValidate.type === "email") {
         setError({ type: "email", message: isEmailValidate.message });
       }
@@ -45,29 +48,33 @@ function Auth({ type }) {
       if (isNumber.type === "number") {
         setError({ type: "number", message: isNumber.message });
       }
-      // if all three are is valid then
+
+      // If all validations are successful
       if (
         isEmailValidate.message === "success" &&
         isNumber.message === "success" &&
         isvalidatePassword.message === "success"
       ) {
-        // console.log(JSON.parse(localStorage.getItem("user")));
+        // Save user data to localStorage and navigate to home page
         localStorage.setItem("user", JSON.stringify(formInput));
         navigate("/");
       }
     } else {
+      // For login
       let { email, password } = formInput;
       let data = localStorage.getItem("user");
       let parsedData = JSON.parse(data);
+
       if (!data) {
-        setError({ type: "normal", message: "user not found" });
+        setError({ type: "normal", message: "User not found" });
         return;
       }
+
       if (email === parsedData.email && password === parsedData.password) {
-        //sign in successfully
+        // Sign in successfully
         navigate("/");
       } else {
-        //error while signing
+        // Error while signing in
         setError({ type: "normal", message: "Invalid credentials" });
       }
     }
@@ -75,12 +82,13 @@ function Auth({ type }) {
 
   return (
     <Form className="w-100 mt-5 mb-2">
+      {/* Display normal error message */}
       <p className="mb-2 fs-sm text-danger">
         {error.type === "normal" && error.message}
       </p>
       {type === "register" && (
         <div>
-          {/* name field */}
+          {/* Name field */}
           <Form.Group
             className="mb-3"
             controlId="formBasicName"
@@ -97,7 +105,8 @@ function Auth({ type }) {
               }
             />
           </Form.Group>
-          {/* mobile field */}
+
+          {/* Mobile Number field */}
           <Form.Group
             className="mb-3"
             controlId="formBasicnumber"
@@ -117,8 +126,9 @@ function Auth({ type }) {
               {error.type === "number" && error.message}
             </Form.Text>
           </Form.Group>
-          {/* here state and city field in single row */}
-          <div className=" d-flex ">
+
+          {/* State and City fields in a single row */}
+          <div className="d-flex">
             <Form.Group
               className="mb-3"
               controlId="formBasicstate"
@@ -160,6 +170,8 @@ function Auth({ type }) {
           </div>
         </div>
       )}
+
+      {/* Email field */}
       <Form.Group
         className="mb-3"
         controlId="formBasicEmail"
@@ -180,6 +192,7 @@ function Auth({ type }) {
         </Form.Text>
       </Form.Group>
 
+      {/* Password field */}
       <Form.Group
         className="mb-3"
         controlId="formBasicPassword"
@@ -200,6 +213,7 @@ function Auth({ type }) {
         </Form.Text>
       </Form.Group>
 
+      {/* Checkbox to show/hide password */}
       <Form.Group
         className="mb-3"
         controlId="formBasicCheckbox"
@@ -207,14 +221,15 @@ function Auth({ type }) {
         <Form.Check
           onClick={() => setShowPasswords((val) => !val)}
           type="checkbox"
-          label="show password"
+          label="Show password"
         />
       </Form.Group>
-      {/* here link for visit login and registration page */}
-      <p className=" text-xs w-100 text-end fs-sm ">
+
+      {/* Link for navigating between login and registration pages */}
+      <p className="text-xs w-100 text-end fs-sm">
         {type === "register" ? (
           <span>
-            already have an account?{" "}
+            Already have an account?{" "}
             <Link
               to={"/login"}
               className="text-primary"
@@ -224,17 +239,18 @@ function Auth({ type }) {
           </span>
         ) : (
           <span>
-            dont have an account?{" "}
+            Don't have an account?{" "}
             <Link
               to={"/register"}
-              className=" text-primary "
+              className="text-primary"
             >
-              signup
+              Signup
             </Link>
           </span>
         )}
       </p>
 
+      {/* Submit button */}
       <Button
         className="w-100 fw-bold"
         variant="primary"
