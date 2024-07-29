@@ -1,9 +1,15 @@
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  validateEmail,
+  validateMobileNumber,
+  validatePassword,
+} from "../utils/Validate";
 
 function Auth({ type }) {
+  const navigate = useNavigate();
   // this is all form inputs
   const [formInput, setFormInput] = useState({
     email: "",
@@ -14,15 +20,64 @@ function Auth({ type }) {
     state: "",
   });
   // this is for validate user
-  const [error, setError] = useState({ type: "", message: "" });
+  const [error, setError] = useState({
+    type: "",
+    message: "",
+  });
   // this state for show password
   const [showPasswords, setShowPasswords] = useState(false);
   const handleformsubmit = () => {
-    console.log(formInput);
+    if (type === "register") {
+      // here i check if email number and password are valid or not
+      let isEmailValidate = validateEmail(formInput.email.toString());
+      let isNumber = validateMobileNumber(parseInt(formInput.mobileNumber));
+      let isvalidatePassword = validatePassword(formInput.password);
+      // console.log(isEmailValidate);
+      // console.log(isNumber);
+      // console.log(isvalidatePassword);
+      // here i check if email number and password are valid
+      if (isEmailValidate.type === "email") {
+        setError({ type: "email", message: isEmailValidate.message });
+      }
+      if (isvalidatePassword.type === "password") {
+        setError({ type: "password", message: isvalidatePassword.message });
+      }
+      if (isNumber.type === "number") {
+        setError({ type: "number", message: isNumber.message });
+      }
+      // if all three are is valid then
+      if (
+        isEmailValidate.message === "success" &&
+        isNumber.message === "success" &&
+        isvalidatePassword.message === "success"
+      ) {
+        // console.log(JSON.parse(localStorage.getItem("user")));
+        localStorage.setItem("user", JSON.stringify(formInput));
+        navigate("/");
+      }
+    } else {
+      let { email, password } = formInput;
+      let data = localStorage.getItem("user");
+      let parsedData = JSON.parse(data);
+      if (!data) {
+        setError({ type: "normal", message: "user not found" });
+        return;
+      }
+      if (email === parsedData.email && password === parsedData.password) {
+        //sign in successfully
+        navigate("/");
+      } else {
+        //error while signing
+        setError({ type: "normal", message: "Invalid credentials" });
+      }
+    }
   };
 
   return (
     <Form className="w-100 mt-5 mb-2">
+      <p className="mb-2 fs-sm text-danger">
+        {error.type === "normal" && error.message}
+      </p>
       {type === "register" && (
         <div>
           {/* name field */}
@@ -63,7 +118,7 @@ function Auth({ type }) {
             </Form.Text>
           </Form.Group>
           {/* here state and city field in single row */}
-          <div className=" d-flex space-2">
+          <div className=" d-flex ">
             <Form.Group
               className="mb-3"
               controlId="formBasicstate"
@@ -141,7 +196,7 @@ function Auth({ type }) {
           }
         />
         <Form.Text className="text-muted">
-          {error.type === "email" && error.message}
+          {error.type === "password" && error.message}
         </Form.Text>
       </Form.Group>
 
@@ -174,7 +229,7 @@ function Auth({ type }) {
               to={"/register"}
               className=" text-primary "
             >
-              Registration
+              signup
             </Link>
           </span>
         )}
